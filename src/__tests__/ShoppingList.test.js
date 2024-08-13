@@ -4,7 +4,7 @@ import {
   render,
   screen,
   fireEvent,
-  waitForElementToBeRemoved,
+  waitFor,
 } from "@testing-library/react";
 import { resetData } from "../mocks/handlers";
 import { server } from "../mocks/server";
@@ -86,13 +86,19 @@ test("updates the isInCart status of an item when the Add/Remove from Cart butto
 test("removes an item from the list when the delete button is clicked", async () => {
   const { rerender } = render(<ShoppingList />);
 
+  // Ensure the item is present before removing it
   const yogurt = await screen.findByText(/Yogurt/);
   expect(yogurt).toBeInTheDocument();
 
   const deleteButtons = await screen.findAllByText(/Delete/);
+  
+  // Click the delete button for the item
   fireEvent.click(deleteButtons[0]);
 
-  await waitForElementToBeRemoved(() => screen.queryByText(/Yogurt/));
+  // Wait for the item to be removed from the DOM
+  await waitFor(() => {
+    expect(screen.queryByText(/Yogurt/)).not.toBeInTheDocument();
+  });
 
   // Rerender the component to ensure the item was persisted
   rerender(<ShoppingList />);
